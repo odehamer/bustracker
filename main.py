@@ -1,8 +1,5 @@
 import requests
-from google.transit import gtfs_realtime_pb2
 from datetime import datetime, timedelta
-import math
-from openrouteservice import client
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image, ImageDraw, ImageFont
 import time
@@ -56,22 +53,10 @@ def fetch_bus_data():
     arrival_times.sort()
     return arrival_times
 
-def get_travel_duration():
-    """Get travel duration from origin to destination"""
-    ors = client.Client(key=ORS_CLIENT_KEY)
-    route = ors.directions(
-        coordinates=[[-117.08373684152153, 32.76697591082071], [-117.0699721334034, 32.77297447999194]],
-        profile='driving-car',
-        format='geojson'
-    )
-    duration = route['features'][0]['properties']['summary']['duration'] * BUS_DURATION_MULTIPLIER
-    return duration
-
 def display_bus_info(matrix):
     """Display the next bus arrival time on the LED matrix"""
     try:
         arrival_times = fetch_bus_data()
-        duration = get_travel_duration()
         
         if not arrival_times:
             display_message(matrix, "No buses found")
@@ -103,11 +88,11 @@ def display_bus_info(matrix):
         draw.text((5, 2), "NEXT BUS", font=small_font, fill=(255, 255, 0))
         
         # Display wait time in minutes (large)
-        wait_text = f"{wait_time_minutes}m"
+        wait_text = str(wait_time_minutes) + "m"
         draw.text((10, 14), wait_text, font=font, fill=(0, 255, 0))
         
         # Display estimated arrival time
-        estimated_arrival = next_bus_time + timedelta(seconds=duration)
+        estimated_arrival = next_bus_time + timedelta(seconds=300)
         arrival_text = estimated_arrival.strftime("%I:%M")
         draw.text((5, 28), arrival_text, font=small_font, fill=(255, 100, 255))
         
