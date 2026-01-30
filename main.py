@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image, ImageDraw, ImageFont
 import time
+from google.protobuf.message import Message
+import gtfs_realtime_pb2
 
 
 MTS_API_KEY = "21a08957-bbfe-4ae8-b0c9-63fbd22953a5"
