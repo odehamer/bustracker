@@ -119,7 +119,10 @@ def display_message(matrix, message):
 # Main loop
 try:
     while True:
+        print("Fetching bus data...")
         display_bus_info(matrix)
+        print("Updated display, sleeping for 30 seconds...")
         time.sleep(30)  # Update every 30 seconds
 except KeyboardInterrupt:
+    print("Stopping...")
     matrix.Clear()
