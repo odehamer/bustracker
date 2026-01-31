@@ -28,6 +28,8 @@ options.hardware_mapping = 'regular'
 options.gpio_slowdown = 2
 options.disable_hardware_pulsing = True
 matrix = RGBMatrix(options=options)
+print(f"Matrix initialized: {matrix.width}x{matrix.height}")
+print(f"Matrix ready: {matrix}")
 
 def fetch_bus_data():
     """Fetch bus arrival data from MTS API"""
@@ -64,12 +66,10 @@ def fetch_bus_data():
             if entity.HasField('trip_update'):
                 trip = entity.trip_update.trip
                 for update in entity.trip_update.stop_time_update:
-                    print(f"Stop ID: {update.stop_id}, looking for: 12896")
                     if update.stop_id == "12896":
                         arrival_time = datetime.fromtimestamp(update.arrival.time)
                         arrival_times.append(arrival_time)
                         trip_ids.append(trip.trip_id)
-                        print(f"Found bus: {arrival_time}")
 
         arrival_times.sort()
         print(f"Total buses for stop 12896: {len(arrival_times)}")
