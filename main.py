@@ -35,16 +35,16 @@ def fetch_bus_data():
     arrival_times = []
     
     response = requests.get(TRIP_UPDATES_URL + MTS_API_KEY)
-    with open("MTS.pb", "wb") as f:
+    with open("/tmp/MTS.pb", "wb") as f:
         f.write(response.content) 
 
     response = requests.get(VEHICLE_POSITIONS_URL + MTS_API_KEY)
-    with open("MTS_vehicles.pb", "wb") as f:
+    with open("/tmp/MTS_vehicles.pb", "wb") as f:
         f.write(response.content)
 
     # Parse the protobuf
     feed = gtfs_realtime_pb2.FeedMessage()
-    with open("MTS.pb", "rb") as f:
+    with open("/tmp/MTS.pb", "rb") as f:
         feed.ParseFromString(f.read())
 
     # Extract trip updates
