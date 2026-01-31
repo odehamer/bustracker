@@ -5,6 +5,10 @@ from PIL import Image, ImageDraw, ImageFont
 import time
 from google.protobuf.message import Message
 from google.transit import gtfs_realtime_pb2
+import os
+
+# Fix SSL certificate issue
+os.environ['REQUESTS_CA_BUNDLE'] = '/etc/ssl/certs/ca-certificates.crt'
 
 
 MTS_API_KEY = "21a08957-bbfe-4ae8-b0c9-63fbd22953a5"
