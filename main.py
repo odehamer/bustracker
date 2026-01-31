@@ -60,8 +60,10 @@ def display_bus_info(matrix):
     """Display the next bus arrival time on the LED matrix"""
     try:
         arrival_times = fetch_bus_data()
+        print(f"Found {len(arrival_times)} buses")
         
         if not arrival_times:
+            print("No buses found, displaying message")
             display_message(matrix, "No buses found")
             return
         
@@ -103,6 +105,7 @@ def display_bus_info(matrix):
         matrix.SetImage(image)
         
     except Exception as e:
+        print(f"Error: {e}")
         display_message(matrix, f"Error: {str(e)[:20]}")
 
 def display_message(matrix, message):
