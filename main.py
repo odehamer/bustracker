@@ -161,6 +161,17 @@ def display_message(matrix, message):
 
 # Main loop
 try:
+    # Test display with a simple pattern
+    print("Running matrix test...")
+    test_image = Image.new('RGB', (matrix.width, matrix.height), color=(0, 0, 0))
+    test_draw = ImageDraw.Draw(test_image)
+    test_draw.rectangle([0, 0, 10, 10], fill=(255, 0, 0))  # Red square
+    test_draw.rectangle([20, 0, 30, 10], fill=(0, 255, 0))  # Green square
+    test_draw.rectangle([40, 0, 50, 10], fill=(0, 0, 255))  # Blue square
+    matrix.SetImage(test_image)
+    print("Test pattern set. Wait 5 seconds to see colored squares...")
+    time.sleep(5)
+    
     while True:
         print("Fetching bus data...")
         display_bus_info(matrix)
