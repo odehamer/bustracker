@@ -22,7 +22,7 @@ options.chain_length = 1
 options.parallel = 1
 options.hardware_mapping = 'regular'
 options.gpio_slowdown = 2
-options.disable_hardware_pulse = True
+options.disable_hardware_pulsing = True
 matrix = RGBMatrix(options=options)
 
 def fetch_bus_data():
