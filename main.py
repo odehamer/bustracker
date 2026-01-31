@@ -26,7 +26,6 @@ options.chain_length = 1
 options.parallel = 1
 options.hardware_mapping = 'regular'
 options.gpio_slowdown = 2
-options.disable_hardware_pulsing = True
 matrix = RGBMatrix(options=options)
 print(f"Matrix initialized: {matrix.width}x{matrix.height}")
 print(f"Matrix ready: {matrix}")
