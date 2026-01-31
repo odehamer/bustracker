@@ -34,35 +34,56 @@ def fetch_bus_data():
     trip_ids = []
     arrival_times = []
     
-    response = requests.get(TRIP_UPDATES_URL + MTS_API_KEY)
-    with open("/tmp/MTS.pb", "wb") as f:
-        f.write(response.content) 
+    try:
+        print("Fetching trip updates...")
+        response = requests.get(TRIP_UPDATES_URL + MTS_API_KEY)
+        print(f"Trip updates response: {response.status_code}")
+        with open("/tmp/MTS.pb", "wb") as f:
+            f.write(response.content)
+        print(f"Wrote {len(response.content)} bytes to MTS.pb")
 
-    response = requests.get(VEHICLE_POSITIONS_URL + MTS_API_KEY)
-    with open("/tmp/MTS_vehicles.pb", "wb") as f:
-        f.write(response.content)
+        print("Fetching vehicle positions...")
+        response = requests.get(VEHICLE_POSITIONS_URL + MTS_API_KEY)
+        print(f"Vehicle positions response: {response.status_code}")
+        with open("/tmp/MTS_vehicles.pb", "wb") as f:
+            f.write(response.content)
+        print(f"Wrote {len(response.content)} bytes to MTS_vehicles.pb")
 
-    # Parse the protobuf
-    feed = gtfs_realtime_pb2.FeedMessage()
-    with open("/tmp/MTS.pb", "rb") as f:
-        feed.ParseFromString(f.read())
+        # Parse the protobuf
+        print("Parsing protobuf...")
+        feed = gtfs_realtime_pb2.FeedMessage()
+        with open("/tmp/MTS.pb", "rb") as f:
+            data = f.read()
+            print(f"Read {len(data)} bytes from MTS.pb")
+            feed.ParseFromString(data)
+        print(f"Parsed feed with {len(feed.entity)} entities")
 
-    # Extract trip updates
-    for entity in feed.entity:
-        if entity.HasField('trip_update'):
-            trip = entity.trip_update.trip
-            for update in entity.trip_update.stop_time_update:
-                if update.stop_id == "12896":
-                    arrival_time = datetime.fromtimestamp(update.arrival.time)
-                    arrival_times.append(arrival_time)
-                    trip_ids.append(trip.trip_id)
+        # Extract trip updates
+        print("Extracting trip updates...")
+        for entity in feed.entity:
+            if entity.HasField('trip_update'):
+                trip = entity.trip_update.trip
+                for update in entity.trip_update.stop_time_update:
+                    print(f"Stop ID: {update.stop_id}, looking for: 12896")
+                    if update.stop_id == "12896":
+                        arrival_time = datetime.fromtimestamp(update.arrival.time)
+                        arrival_times.append(arrival_time)
+                        trip_ids.append(trip.trip_id)
+                        print(f"Found bus: {arrival_time}")
 
-    arrival_times.sort()
-    return arrival_times
+        arrival_times.sort()
+        print(f"Total buses for stop 12896: {len(arrival_times)}")
+        return arrival_times
+    except Exception as e:
+        print(f"Error in fetch_bus_data: {e}")
+        import traceback
+        traceback.print_exc()
+        return []
 
 def display_bus_info(matrix):
     """Display the next bus arrival time on the LED matrix"""
     try:
+        print("=== Starting display_bus_info ===")
         arrival_times = fetch_bus_data()
         print(f"Found {len(arrival_times)} buses")
         
@@ -76,12 +97,15 @@ def display_bus_info(matrix):
         current_time = datetime.now()
         wait_time_seconds = (next_bus_time - current_time).total_seconds()
         wait_time_minutes = int(wait_time_seconds / 60)
+        print(f"Next bus in {wait_time_minutes} minutes at {next_bus_time}")
         
         if wait_time_minutes < 0:
+            print("Bus already passed")
             display_message(matrix, "Bus passed")
             return
         
         # Create image for display
+        print(f"Creating image ({matrix.width}x{matrix.height})")
         image = Image.new('RGB', (matrix.width, matrix.height), color=(0, 0, 0))
         draw = ImageDraw.Draw(image)
         
@@ -89,7 +113,9 @@ def display_bus_info(matrix):
         try:
             font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 16)
             small_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
-        except:
+            print("Loaded fonts")
+        except Exception as font_err:
+            print(f"Font error: {font_err}, using default")
             font = ImageFont.load_default()
             small_font = ImageFont.load_default()
         
@@ -105,23 +131,33 @@ def display_bus_info(matrix):
         arrival_text = estimated_arrival.strftime("%I:%M")
         draw.text((5, 28), arrival_text, font=small_font, fill=(255, 100, 255))
         
+        print(f"Drawing text: '{wait_text}' at (10,14), '{arrival_text}' at (5,28)")
         # Set the image on the matrix
         matrix.SetImage(image)
+        print("Image set on matrix successfully")
+        print("=== End display_bus_info ===")
         
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error in display_bus_info: {e}")
+        import traceback
+        traceback.print_exc()
         display_message(matrix, f"Error: {str(e)[:20]}")
 
 def display_message(matrix, message):
     """Display a simple message on the LED matrix"""
-    image = Image.new('RGB', (matrix.width, matrix.height), color=(0, 0, 0))
-    draw = ImageDraw.Draw(image)
+    print(f"Displaying message: '{message}'")
     try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
-    except:
-        font = ImageFont.load_default()
-    draw.text((2, 12), message, font=font, fill=(255, 0, 0))
-    matrix.SetImage(image)
+        image = Image.new('RGB', (matrix.width, matrix.height), color=(0, 0, 0))
+        draw = ImageDraw.Draw(image)
+        try:
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 10)
+        except:
+            font = ImageFont.load_default()
+        draw.text((2, 12), message, font=font, fill=(255, 0, 0))
+        matrix.SetImage(image)
+        print(f"Message displayed successfully")
+    except Exception as e:
+        print(f"Error displaying message: {e}")
 
 # Main loop
 try:
