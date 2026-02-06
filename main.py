@@ -27,7 +27,7 @@ options.parallel = 1
 options.hardware_mapping = 'regular'
 options.gpio_slowdown = 2
 matrix = RGBMatrix(options=options)
-print(f"Matrix initialized: {matrix.width}x{matrix.height}")
+print(f"Matrix initialdized: {matrix.width}x{matrix.height}")
 print(f"Matrix ready: {matrix}")
 
 def fetch_bus_data():
